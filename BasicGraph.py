@@ -25,7 +25,7 @@ for i in range(0,4):        # setting "stay" probabilities at 0.25
     newGraph.addEdge(i,i,0.25)
 
 newGraph.addEdge(0,1,0.375)  # set up some edges manually
-newGraph.addEdge(0,3,0.375)  # this matrix basically moves left and right with equal probability (1/4)
+newGraph.addEdge(0,3,0.375)  # this matrix basically moves left and right with equal probability (3/8)
 
 newGraph.addEdge(1,0,0.375)
 newGraph.addEdge(1,2,0.375)
