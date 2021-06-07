@@ -16,8 +16,12 @@ tMatrix(n,n-1)=1/3;
 tMatrix(n,n) = 2/3;
 
 % initialise the agents on the far left
-A = 20;
+A = 1000;
 agents = ones(1,A);
+
+% initial prob. of being at node i 
+pi = rand(1, n);
+pi = pi/sum(pi);
 
 % simulation data
 time = 50;
@@ -27,10 +31,13 @@ timesteps = time/dt;
 % live plotting
 for timestep = 1 : timesteps
     
+    pi = pi*tMatrix;    
+    
     for agent = 1 : A
-        counter = 1;
+        counter = 0;
         rVal = rand();
-        cVal = tMatrix(agents(agent), counter);
+        %cVal = tMatrix(agents(agent), counter);
+        cVal = 0.0;
         while (cVal < rVal)
             counter = counter + 1;
             cVal = cVal + tMatrix(agents(agent), counter);
@@ -38,9 +45,10 @@ for timestep = 1 : timesteps
         agents(agent) = counter;
     end
     
-    histogram(agents,n,'BinWidth', 1);
+    histogram(agents,n, 'Normalization', 'pdf');%,'BinWidth', 1);
     xlim([1,n+1]);
-    ylim([0,A+1]);
-    pause(0.5);
+    ylim([0,1]);
+    %pause(0.5);
+    drawnow;
     
 end
