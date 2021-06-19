@@ -18,15 +18,11 @@ def floe_movement(x,y):
 
 
 # O----------------------- define the graph  -----------------------O
-n = 3                       # number of nodes on one side of the
-                            # ... square (total number of nodes: n^2)
-p_stay = 1/4                # probability of staying at a node
-
 class Node:                 # Node class
     # map from (i,j) in n x n to k in n^2 : (i,j) -> k= i*n + j
     # reverse map for k: k -> ((k-j)/n, k mod n)
 
-    def __init__(self, k):
+    def __init__(self, k, n):
         if (k >= n**2):
             print("Warning: node index out of bounds.")
         self.k = k
@@ -49,15 +45,15 @@ class Graph:                # Graph class
 
     def __init__(self, n, mass):
         self.n = n                                          # number of nodes on onee side of the graph
-        self.p_stay = p_stay                                # probability of staying (not sure if needed)
+        self.p_stay = 1/4                                   # probability of staying (not sure if needed)
         self.nodes = []                                     # list of nodes (not sure if needed)
         self.tMatrix = np.zeros((n**2,n**2))                # transition matrix
-        self.mass = np.zeros(n**2)                          # initial coditions (mass at each node)
+        self.mass = mass_0                                  # initial coditions (mass at each node)
 
     def initialise_nodes(self):
         self.nodes = []
         for k in range(0,n**2):
-            self.nodes.append(Node(k))                      # nodes are denoted with single index k
+            self.nodes.append(Node(k,n))                      # nodes are denoted with single index k
 
     def initialise_tMatrix(self):
         self.initialise_nodes()
@@ -65,8 +61,9 @@ class Graph:                # Graph class
             self.tMatrix[node.k,node.k] = self.p_stay       # !!! BIG CHANGES NEEDED HERE !!!
 
 # O-------------------- simulation --------------------O
-mass = np.zeros(n**2)               # initial condition
+n = 3
+mass_0 = np.zeros(n**2)              # initial condition
 
-g = Graph(n, mass)                 # create a graph
+g = Graph(n, mass_0)                 # create a graph
 #g.initialise_tMatrix()              # initialise it
-print(g.tMatrix)                    # check it
+print(g.tMatrix)                     # check it
