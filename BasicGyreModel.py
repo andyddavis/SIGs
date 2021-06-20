@@ -1,6 +1,7 @@
 import numpy as np
 import statistics as st
 import math
+import time as t
 
 # O----------------- define the space (unit square)  -----------------O
 x_lim = (0,1)
@@ -78,7 +79,7 @@ class Graph:                # Graph class
                 u = 0
             if (k < n and v > 0):
                 v = 0
-            if (k > (n-1)**2 and k < n**2 and v < 0):
+            if (k > (n-1)*n and k < n**2 and v < 0):
                 v = 0
 
             # pre-calculate useful values
@@ -103,9 +104,32 @@ class Graph:                # Graph class
                     self.tMatrix[k,k+n] = -(1 - p_stay) * v / v_sum
 
 # O-------------------- simulation --------------------O
-n = 10                              # number of nodes on one side (total nodes: n^2)
-mass_0 = np.zeros(n**2)             # initial condition (inital mass at each node)
-p_0 = 1                             # "inertial" parameter (changes probability of staying)
+class GyreSimulation:
+
+    def __init__(self, graph, time, dt):
+        self.graph = graph
+        self.time = time
+        self.dt = dt
+
+    def basic_sim(self):
+        m = self.graph.mass
+        for timestep in range(0, round(self.time/self.dt)):
+            m = m.dot(self.graph.tMatrix)
+            print("time: ", timestep * dt)
+            print(m.reshape(n,n))
+            t.sleep(self.dt)
+
+
+time = 10                           # time-length of simulation
+dt = 0.1                            # size of each time-step
+
+n = 4                               # number of nodes on one side (total nodes: n^2)
+mass_0=np.zeros(n**2); mass_0[0]=1  # initial condition (inital mass at each node)
+p_0 = 1                            # "inertial" parameter (changes probability of staying)
 
 g = Graph(n, p_0, mass_0)           # create a graph
 g.initialise_tMatrix()              # initialise it
+#print(g.tMatrix)
+
+sim = GyreSimulation(g, time, dt)   # create a GyreSimulation
+sim.basic_sim()
