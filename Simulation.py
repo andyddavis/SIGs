@@ -29,19 +29,19 @@ class Simulation:
     def basic_sim(self):
         m = self.graph.mass
         for timestep in range(0, round((self.time+self.dt)/self.dt)):
-            #print("time: ", timestep * dt)
-            #print(m.reshape(n,n))
-            #plt.imshow(m.reshape(n,n), cmap='gray', interpolation='nearest',  extent=[0, 1, 0, 1], vmin=0, vmax=1)
-            #plt.colorbar()
-            #plt.title("Time: " + str( timestep * dt))
-            #plt.draw()
-            #plt.pause(self.dt)
-            m = m.dot(self.graph.tMatrix)
-            #t.sleep(self.dt)
-            # plt.show()
+            # color scheme
+            #cmap = 'gray'
+            c_map = 'jet'
 
+            # domain
+            d = self.graph.domain
+            dom = [d.x_lim[0], d.x_lim[1], d.y_lim[0], d.y_lim[1]]
+
+            # plot
             fig = plt.figure()
-            plt.imshow(m.reshape(self.graph.n,self.graph.n), cmap='jet', interpolation='nearest',  extent=[0, 1, 0, 1])
+            plt.imshow(m.reshape(self.graph.n,self.graph.n), cmap=c_map, interpolation='nearest',  extent=dom, vmin=0, vmax = 2 * np.sum(m) / self.graph.n ** 2)
+            plt.title("Time: " + str( timestep * self.dt))
             plt.colorbar()
             plt.savefig('figures/Step-'+str(timestep).zfill(10)+'.png', format='png', bbox_inches='tight')
             plt.close(fig)
+            m = m.dot(self.graph.wind_tMatrix)

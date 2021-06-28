@@ -1,4 +1,6 @@
 import statistics as st
+import math
+
 
 class Domain:
     def __init__(self):
@@ -13,4 +15,5 @@ class Domain:
         z = (x**2 + y**2)**0.5  # z is magnitude to normalise to unit vectors
         if (z == 0):                # catches division by zero
             z = 1
-        return (y/z,-x/z)           # actual function (unit gyre, clockwise)
+
+        return (1,1)           # actual function (unit gyre, clockwise)
