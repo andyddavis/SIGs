@@ -1,8 +1,9 @@
-class Domain:
+from Domain import *
+
+class GyreDomain:
     def __init__(self):
-        self.x_lim = (0.0, 1.0)
-        self.y_lim = (0.0, 1.0)
+        Domain.__init__(self)
 
     # O---------- define floe movement function (vector field)  ----------O
     def external_velocity(self, x, y):
-        return (0.0, 0.0)
+        return (-y+0.5, x-0.5)

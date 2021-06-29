@@ -5,14 +5,14 @@ from Node import *
 
 class Graph:                                                # Graph class
 
-    def __init__(self, n, p_0, mass):
+    def __init__(self, n, p_0, domain):
         self.n = n                                          # number of nodes on onee side of the graph
         self.nodes = []                                     # list of nodes (not sure if needed)
-        self.mass = mass                                    # initial conditions (mass at each node)
+        #self.mass = mass                                    # initial conditions (mass at each node)
         self.p_0 = p_0                                      # probability of staying parameter
-        self.wind_tMatrix = np.zeros((n**2,n**2))           # wind transition matrix (external forcing)
-        self.idle_tMatrix = np.zeros((n**2,n**2))           # diffusion transition matrix (internal forcing)
-        self.domain = Domain()                              # domain (space coordinates and floe-velocity field)
+        #self.wind_tMatrix = np.zeros((n**2,n**2))           # wind transition matrix (external forcing)
+        #self.idle_tMatrix = np.zeros((n**2,n**2))           # diffusion transition matrix (internal forcing)
+        self.domain = domain                                # domain (space coordinates and floe-velocity field)
 
     # creates the list of nodes in the graph
     def initialise_nodes(self):
