@@ -20,14 +20,34 @@ plt.rcParams['legend.fontsize'] = 14
 class Simulation:
 
     def __init__(self, graph, options):
-        self.graph = graph                                  # the graph
-        self.options = options # options for the simulation
+        self.graph = graph                                              # the graph
+        self.options = options                                          # options for the simulation
         self.wind_tMatrix = np.zeros((graph.n**2,graph.n**2))           # wind transition matrix (external forcing)
         self.idle_tMatrix = np.zeros((graph.n**2,graph.n**2))           # diffusion transition matrix (internal forcing)
 
+    def node_advection_transition_probabilities(self, node):
+        transition_node_indices = [node.k, (node.j-1) % self.graph.n + self.graph.n * node.i , (node.j+1) % self.graph.n + self.graph.n * node.i, (node.k + self.graph.n ) % self.graph.n**2, (node.k - self.graph.n) % self.graph.n**2]
+        p_stay = 1 / (1 + self.graph.p_0 * self.graph.n * self.options['timestep length'] * np.linalg.norm(node.velocity()))
+        transition_node_probabilities = [0.0] * len(transition_node_indices)
+        if abs(p_stay - 1) < 1.0e-13:
+            transition_node_probabilities[0] = p_stay
+            return transition_node_indices, transition_node_probabilities
+
+        for i in range(1, len(transition_node_indices)):
+            edge = self.graph.nodes[transition_node_indices[i]].pos() - node.pos()
+            transition_node_probabilities[i] = max(0.0, np.dot(edge,node.velocity()))
+
+        S = sum(transition_node_probabilities)
+
+        transition_node_probabilities = (1 - p_stay) * np.array(transition_node_probabilities) * (1 / S)
+        transition_node_probabilities[0] = p_stay
+
+        return transition_node_indices, transition_node_probabilities
+
+
     def advection_transition_matrix(self):
         for node in self.graph.nodes:
-            print(node.k)
+            pass
 
     # initialises the wind transition matrix (external forcing)
     def initialise_wind_tMatrix(self):

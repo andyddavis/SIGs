@@ -27,7 +27,7 @@ class Node:                 # Node class
     def pos(self):
         if (self.i >= self.n) or (self.j >= self.n):
             return print("Error 'pos_node': index out of bounds.")
-        return( (self.j + 0.5) / self.n, 1 - (0.5 + self.i) / self.n)
+        return np.array([(self.j + 0.5) / self.n, 1 - (0.5 + self.i) / self.n])
 
     # returns the velocity vector (u,v) at the position of the node
     def velocity(self):

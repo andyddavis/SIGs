@@ -61,3 +61,40 @@ class TestSimulation(unittest.TestCase):
             # test p_stay correctness
             self.assertAlmostEqual(sim.wind_tMatrix[node.k,node.k], 1/(1+ p_0 * n * (node.velocity()[0]**2 + node.velocity()[1]**2)**0.5), 1.0e-12)
         pass
+
+    def test_node_advection_transition_probabilities(self):
+        domain = Domain()
+        n = 20; p_0 = 0.1;
+        graph = Graph(n,p_0,domain)
+
+        options = dict()
+        options['timestep length'] = 0.1
+
+        sim = Simulation(graph, options)
+
+        for node in sim.graph.nodes:
+            transition_node_indices, transition_node_probabilities = sim.node_advection_transition_probabilities(node)
+            self.assertEqual(len(transition_node_indices),len(transition_node_probabilities))
+            for index in range(len(transition_node_probabilities)):
+                if (index == 0 ):
+                    self.assertAlmostEqual(transition_node_probabilities[index],1,1.0e-12)
+                else:
+                    self.assertAlmostEqual(transition_node_probabilities[index],0,1.0e-12)
+            for index in transition_node_indices:
+                neighbor = sim.graph.nodes[index]
+                # vertical neighbor check
+                if (node.i == 0):
+                    self.assertTrue((neighbor.i == 0) or (neighbor.i == 1) or (neighbor.i == n-1))
+                if (node.i == n-1):
+                    self.assertTrue((neighbor.i == 0) or (neighbor.i == n-2) or (neighbor.i == n-1))
+                # interior
+                if (node.i != 0 and node.i != n-1):
+                    self.assertTrue((node.i == neighbor.i) or (node.i == neighbor.i + 1) or (node.i == neighbor.i-1))
+                # horizontal neighbor check
+                if (node.j == 0):
+                    self.assertTrue((neighbor.j == 0) or (neighbor.j == 1) or (neighbor.j == n-1))
+                if (node.j == n-1):
+                    self.assertTrue((neighbor.j == 0) or (neighbor.j == n-2) or (neighbor.j == n-1))
+                # interior
+                if (node.j != 0 and node.j != n-1):
+                    self.assertTrue((node.j == neighbor.j) or (node.j == neighbor.j + 1) or (node.j == neighbor.j-1))
