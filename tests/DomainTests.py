@@ -5,7 +5,7 @@ from Domain import *
 class TestDomain(unittest.TestCase):
     def test_domain_construction(self):
         domain = Domain()
-
+        # test components of x and y limits
         self.assertAlmostEqual(domain.x_lim[0], 0.0, 1.0e-12)
         self.assertAlmostEqual(domain.x_lim[1], 1.0, 1.0e-12)
         self.assertAlmostEqual(domain.y_lim[0], 0.0, 1.0e-12)
