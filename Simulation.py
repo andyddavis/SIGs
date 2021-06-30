@@ -19,13 +19,15 @@ plt.rcParams['legend.fontsize'] = 14
 # O-------------------- simulation --------------------O
 class Simulation:
 
-    def __init__(self, graph, mass, time, dt):
+    def __init__(self, graph, options):
         self.graph = graph                                  # the graph
-        self.mass = mass                                    # initial conditions (mass at each node)
-        self.time = time                                    # total time of simulation
-        self.dt = dt                                        # length of each timestep
+        self.options = options # options for the simulation
         self.wind_tMatrix = np.zeros((graph.n**2,graph.n**2))           # wind transition matrix (external forcing)
         self.idle_tMatrix = np.zeros((graph.n**2,graph.n**2))           # diffusion transition matrix (internal forcing)
+
+    def advection_transition_matrix(self):
+        for node in self.graph.nodes:
+            print(node.k)
 
     # initialises the wind transition matrix (external forcing)
     def initialise_wind_tMatrix(self):
@@ -83,7 +85,6 @@ class Simulation:
 
     # initialise the transition matrices
     def initialise_matrices(self):
-        self.graph.initialise_nodes()           # initialise the nodes
         self.initialise_wind_tMatrix()          # initialise wind transition matrix
         self.initialise_idle_tMatrix()          # initialsie diffusion transition matrix
 

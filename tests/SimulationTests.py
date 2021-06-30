@@ -10,29 +10,48 @@ class TestSimulation(unittest.TestCase):
     def test_simulation_construction(self):
         # construct a valid simulation
         domain = Domain()
-        t = 100; dt = 0.1
-        n = 20; p_0 = dt;
+        n = 20; p_0 = 0.1;
         graph = Graph(n,p_0,domain)
-        mass = []
-        sim = Simulation(graph,mass,t,dt)
+        self.assertEqual(len(graph.nodes), n**2)
+
+        dt = 0.1
+        options = dict()
+        options['timestep length'] = dt
+
+        sim = Simulation(graph, options)
+
         # test equality/existence of each field
         self.assertEqual(sim.graph, graph)
-        self.assertEqual(sim.mass, mass)
-        self.assertEqual(sim.time, t)
-        self.assertEqual(sim.dt, dt)
+        self.assertEqual(len(sim.graph.nodes), n**2)
+        self.assertEqual(sim.options['timestep length'], dt)
         for i in range (0, graph.n**2):
             for j in range (0, graph.n**2):
                 self.assertEqual(sim.wind_tMatrix[i,j],0)
                 self.assertEqual(sim.idle_tMatrix[i,j],0)
 
+    def test_advection_transition_matrix(self):
+        domain = Domain()
+        n = 20 # number of nodes per size
+        p0 = 0.1 # parameter that determines the probability of staying
+        graph = Graph(n, p0, domain)
+
+        options = dict()
+        options['timestep length'] = 0.1
+
+        sim = Simulation(graph, options)
+
+        sim.advection_transition_matrix()
+
     def test_matrices_initialisation(self):
         # construct a valid simulation
         domain = Domain()
-        t = 100; dt = 0.1
-        n = 20; p_0 = dt;
+        n = 20; p_0 = 0.1;
         graph = Graph(n,p_0,domain)
-        mass = []
-        sim = Simulation(graph,mass,t,dt)
+
+        options = dict()
+        options['timestep length'] = 0.1
+
+        sim = Simulation(graph, options)
 
         # construct the matrices
         sim.initialise_matrices()

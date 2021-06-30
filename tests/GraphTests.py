@@ -13,7 +13,7 @@ class TestGraph(unittest.TestCase):
 
         graph = Graph(n, p0, domain)
         self.assertEqual(graph.n, n)
-        self.assertEqual(len(graph.nodes),0)
+        self.assertEqual(len(graph.nodes), n**2)
         self.assertAlmostEqual(graph.p_0, p0, 1.0e-12)
 
     def test_node_initialisation(self):
@@ -22,12 +22,7 @@ class TestGraph(unittest.TestCase):
         for i in range(0,100):
             n = random.randint(1,100)
             graph = Graph(n, 0.1, domain)
-            self.assertEqual(len(graph.nodes),0)
+            self.assertEqual(len(graph.nodes), n**2)
 
-            graph.initialise_nodes()
-            self.assertEqual(len(graph.nodes),n**2)
-
-            k = 0
-            for node in graph.nodes:
+            for node, k in zip(graph.nodes, range(n**2)):
                 self.assertEqual(node.k, k)
-                k += 1
