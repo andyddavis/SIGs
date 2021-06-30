@@ -55,7 +55,7 @@ class CollisionOperator:        # Collision Operator class
 
     # runs the collision operator and returns the useful values
     def collision_analysis(self):
-        K_e = 0     # kinetic energy
-        P_e = 0     # potential energy
+        k_e = 0     # kinetic energy
+        p_e = 0     # potential energy
         v_f = 0     # final mean velocity
-        return (K_e, P_e, v_f)      # return kinetic energy, portential energy, and final expected velocity
+        return (k_e, p_e, v_f)      # return kinetic energy, portential energy, and final expected velocity

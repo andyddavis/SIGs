@@ -16,7 +16,7 @@ dt = 1                          # size of each time-step
 # graph attributes
 n = 20                          # number of nodes on one side (total nodes: n^2) 200
 mass_0=np.ones(n**2)            # initial condition (inital mass at each node)
-p_0 = dt                        # "inertial" parameter (changes probability of staying)
+p_0 = 1 * dt                        # "inertial" parameter (changes probability of staying)
 
 g = Graph(n, p_0, mass_0)       # create a graph
 g.initialise_graph()            # initialise it

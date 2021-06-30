@@ -32,5 +32,5 @@ class Node:                 # Node class
     # returns the velocity vector (u,v) at the position of the node
     def velocity(self):
         (x,y) = self.pos()
-        (u,v) = self.domain().floe_movement(x,y)
+        (u,v) = self.domain().external_velocity(x,y)
         return(u,v)
