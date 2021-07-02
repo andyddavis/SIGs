@@ -17,7 +17,7 @@ class Node:                 # Node class
         self.j = k % n
         self.i = round((k-self.j)/n)
 
-        self.domain = weakref.ref(domain)
+        self.domain = domain
 
     # returns string representation including node labal k and indicies (i,j)
     def __str__(self):
@@ -32,5 +32,5 @@ class Node:                 # Node class
     # returns the velocity vector (u,v) at the position of the node
     def velocity(self):
         (x,y) = self.pos()
-        (u,v) = self.domain().external_velocity(x,y)
+        (u,v) = self.domain.external_velocity(x,y)
         return(u,v)

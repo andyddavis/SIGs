@@ -21,5 +21,5 @@ class TestGyreDomain(unittest.TestCase):
         # evaluate the external velocity field
         vel = domain.external_velocity(x, y)
         self.assertEqual(len(vel), 2)
-        self.assertAlmostEqual(vel[0], -(y-0.5), 1.0e-12)
-        self.assertAlmostEqual(vel[1], x-0.5, 1.0e-12)
+        self.assertAlmostEqual(vel[0], (y-0.5), 1.0e-12)
+        self.assertAlmostEqual(vel[1], -(x-0.5), 1.0e-12)

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import linalg
 import math
 
 # import plotting packages and set default figure options
@@ -16,102 +17,66 @@ plt.rcParams['xtick.labelsize'] = 14
 plt.rcParams['ytick.labelsize'] = 14
 plt.rcParams['legend.fontsize'] = 14
 
-# O-------------------- simulation --------------------O
 class Simulation:
 
     def __init__(self, graph, options):
         self.graph = graph                                              # the graph
         self.options = options                                          # options for the simulation
-        self.wind_tMatrix = np.zeros((graph.n**2,graph.n**2))           # wind transition matrix (external forcing)
-        self.idle_tMatrix = np.zeros((graph.n**2,graph.n**2))           # diffusion transition matrix (internal forcing)
+        self.advection_tMatrix = np.zeros((graph.n**2,graph.n**2))      # alt matrix
+        self.diffusion_tMatrix = np.zeros((graph.n**2,graph.n**2))      # diffusion transition matrix (internal forcing)
 
+    # initialises the node advection probabilities and their corresponding indices
     def node_advection_transition_probabilities(self, node):
+
+        # calculate node indices (periodic boundary), ordered: itself, left, right, below, above)
         transition_node_indices = [node.k, (node.j-1) % self.graph.n + self.graph.n * node.i , (node.j+1) % self.graph.n + self.graph.n * node.i, (node.k + self.graph.n ) % self.graph.n**2, (node.k - self.graph.n) % self.graph.n**2]
+
+        # calculate probability of staying
         p_stay = 1 / (1 + self.graph.p_0 * self.graph.n * self.options['timestep length'] * np.linalg.norm(node.velocity()))
+
+        # initialise probabilities
         transition_node_probabilities = [0.0] * len(transition_node_indices)
+
+        # if p_stay 1, no need for other calculations (||v|| = 0)
         if abs(p_stay - 1) < 1.0e-13:
             transition_node_probabilities[0] = p_stay
             return transition_node_indices, transition_node_probabilities
 
+        # otherwise, calculate "leaving measure" for each neighbor
         for i in range(1, len(transition_node_indices)):
+            # calculate edge vector
             edge = self.graph.nodes[transition_node_indices[i]].pos() - node.pos()
-            transition_node_probabilities[i] = max(0.0, np.dot(edge,node.velocity()))
+            if (np.linalg.norm(edge) > 0.5):                                           # assuming [0,1] X [0,1] (dependent on x_lim, y_lim - if errors, that's why)
+                edge[0] = - np.sign(edge[0]) * (1 / self.graph.n)                      # periodic boundary condition fix (assuming uniform square lattice grid)
+                edge[1] = - np.sign(edge[1]) * (1 / self.graph.n)
+            # assign  measure
+            transition_node_probabilities[i] = max(0.0, np.dot(edge, node.velocity()))
 
+        # normalise probabilies of leaving
         S = sum(transition_node_probabilities)
-
         transition_node_probabilities = (1 - p_stay) * np.array(transition_node_probabilities) * (1 / S)
-        transition_node_probabilities[0] = p_stay
 
+        # finally, assign probability of staying and return indices/probabilities
+        transition_node_probabilities[0] = p_stay
         return transition_node_indices, transition_node_probabilities
 
-
+    # create the advection transition matrix
     def advection_transition_matrix(self):
         for node in self.graph.nodes:
-            pass
-
-    # initialises the wind transition matrix (external forcing)
-    def initialise_wind_tMatrix(self):
-        boundary_condition = 0                              # (0) periodic or (1) closed
-        for node in self.graph.nodes:                       # assign probabilities for eaech node:
-            i = node.i; j = node.j; k = node.k              # gather node indices
-            n = self.graph.n
-            (u,v) = node.velocity()                         # gather component velocities
-            v_mag = (u**2 + v**2)**0.5                      # magnitude of velocity vector at node
-
-            # boundary conditions: closed (magnitude perserving - rotates velocity parallel to boundary)
-            if boundary_condition == 1:
-                if (j == 0 and u < 0):
-                    u = 0; v = np.sign(v) * v_mag
-                if (j == (n-1) and u > 0):
-                    u = 0; v = np.sign(v) * v_mag
-                if (i == 0 and v > 0):
-                    v = 0; u = np.sign(u) * v_mag
-                if (i == (n-1) and v < 0):
-                    v = 0; u = np.sign(u) * v_mag
-
-            # pre-calculate useful values
-            v_sum = abs(u) + abs(v)                         # sum of vector components
-            p_i = self.graph.p_0 * n                             # p_stay parameter
-            p_stay = 1 / (1 + p_i * v_mag)                  # probability of staying formula (credit: andy)
-            self.wind_tMatrix[k,k] = p_stay                 # assign to diagonals
-
-            # assign horizontal probabilities (adgacent to node k +/- 1 index)
-            if (u > 0):
-                if (j + 1 < n):
-                    self.wind_tMatrix[k,k+1]   =  (1 - p_stay) * u / v_sum
-                elif (boundary_condition == 0):
-                    self.wind_tMatrix[k,k+1-n] =  (1 - p_stay) * u / v_sum
-            elif (u < 0):
-                if (j - 1 >= 0):
-                    self.wind_tMatrix[k,k-1]   = -(1 - p_stay) * u / v_sum
-                elif (boundary_condition == 0):
-                    self.wind_tMatrix[k,k-1+n] = -(1 - p_stay) * u / v_sum
-            # assign vertical probabilities (adgacent to node k +/- n index)
-            if (v > 0):
-                if (i - 1 >= 0):
-                    self.wind_tMatrix[k,k-n] = (1 - p_stay) * v / v_sum
-                elif (boundary_condition == 0):
-                    self.wind_tMatrix[k,k-n+n**2] = (1 - p_stay) * v / v_sum
-            elif (v < 0):
-                if (i + 1 < n):
-                    self.wind_tMatrix[k,k+n] = -(1 - p_stay) * v / v_sum
-                elif (boundary_condition == 0):
-                    self.wind_tMatrix[k,k+n-n**2] = -(1 - p_stay) * v / v_sum
+            (indices, probabilities) = self.node_advection_transition_probabilities(node)
+            for i in range(0,len(indices)):
+                self.advection_tMatrix[node.k, indices[i]] = probabilities[i]
 
     # initialise the diffusion matrix
-    def initialise_idle_tMatrix(self):
+    def diffusion_transition_tMatrix(self):
         ## TODO: diffusion matrix
         pass
 
-    # initialise the transition matrices
-    def initialise_matrices(self):
-        self.initialise_wind_tMatrix()          # initialise wind transition matrix
-        self.initialise_idle_tMatrix()          # initialsie diffusion transition matrix
-
-    def basic_sim(self):
+    def advection_sim(self, mass):
+        self.advection_transition_matrix()
         counter = 0
         frameskip = 5
-        for timestep in range(0, round(self.time/self.dt)):
+        for timestep in range(0, round(self.options['total time']/self.options['timestep length'])):
             # color scheme
             #cmap = 'gray'
             c_map = 'jet'
@@ -123,9 +88,31 @@ class Simulation:
             # plot
             if(counter % frameskip == 0):
                 fig = plt.figure()
-                plt.imshow(self.mass.reshape(self.graph.n,self.graph.n), cmap=c_map, interpolation='nearest',  extent=dom, vmin=0, vmax = 2 * np.sum(mass) / self.graph.n ** 2)
-                plt.title("Time: " + str( timestep * self.dt))
+                plt.imshow(mass.reshape(self.graph.n,self.graph.n), cmap=c_map, interpolation='nearest',  extent=dom, vmin=0, vmax = 2 * np.sum(mass) / self.graph.n ** 2)
+                plt.title("Time: " + str( timestep * self.options['timestep length']))
                 plt.colorbar()
                 plt.savefig('figures/Step-'+str(int(timestep/frameskip)).zfill(10)+'.png', format='png', bbox_inches='tight')
                 plt.close(fig)
-            self.mass = self.mass.dot(self.graph.wind_tMatrix)
+            mass = mass.dot(self.advection_tMatrix)
+
+    def plot_steady_state(self):
+        #eigendecomposition; eigenvalues, eigenvectors
+        self.advection_transition_matrix()
+
+        L, V = linalg.eig(self.advection_tMatrix, left=True, right=False)
+
+        cnt = 0
+        for l in L:
+            if l >= 0.99999999:
+                break
+            cnt += 1
+
+        steady_state = V.transpose().real[cnt]
+        sum = steady_state.sum()
+        steady_state = steady_state / sum
+        steady_state = steady_state / steady_state.max()
+
+        #plot
+        plt.imshow(steady_state.reshape(self.graph.n, self.graph.n), cmap="jet",  extent=[0,1,0,1], vmin = 0, vmax = 1)
+        plt.colorbar()
+        plt.show()

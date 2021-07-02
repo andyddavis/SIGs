@@ -26,8 +26,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(sim.options['timestep length'], dt)
         for i in range (0, graph.n**2):
             for j in range (0, graph.n**2):
-                self.assertEqual(sim.wind_tMatrix[i,j],0)
-                self.assertEqual(sim.idle_tMatrix[i,j],0)
+                self.assertEqual(sim.advection_tMatrix[i,j],0)
 
     def test_advection_transition_matrix(self):
         domain = Domain()
@@ -54,12 +53,12 @@ class TestSimulation(unittest.TestCase):
         sim = Simulation(graph, options)
 
         # construct the matrices
-        sim.initialise_matrices()
+        sim.advection_transition_matrix()
         for node in sim.graph.nodes:
             # test stochasticity
-            self.assertAlmostEqual(sum(sim.wind_tMatrix[node.k]), 1.0, 1.0e-12)
+            self.assertAlmostEqual(sum(sim.advection_tMatrix[node.k]), 1.0, 1.0e-12)
             # test p_stay correctness
-            self.assertAlmostEqual(sim.wind_tMatrix[node.k,node.k], 1/(1+ p_0 * n * (node.velocity()[0]**2 + node.velocity()[1]**2)**0.5), 1.0e-12)
+            self.assertAlmostEqual(sim.advection_tMatrix[node.k,node.k], 1/(1+ p_0 * n * (node.velocity()[0]**2 + node.velocity()[1]**2)**0.5), 1.0e-12)
         pass
 
     def test_node_advection_transition_probabilities(self):
