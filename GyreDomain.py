@@ -1,4 +1,5 @@
 from Domain import *
+import numpy as np
 
 class GyreDomain:
     def __init__(self):
@@ -6,7 +7,12 @@ class GyreDomain:
 
     # define external velocity (vector field)
     def external_velocity(self, x, y):
-        return ((y-0.5), -(x-0.5))
+        x = x
+        y = y
+        k = 1
+        #return (np.sin(k * np.pi * x) * np.cos(k * np.pi * y), np.cos(k * np.pi * x) * np.sin(k * np.pi *y))
+        #return (k*y/np.linalg.norm([x,y]), -k*x/np.linalg.norm([x,y]))
+        return (np.sin(k * np.pi * x) * np.cos(k * np.pi * y), - np.cos(k * np.pi * x) * np.sin(k * np.pi *y))
 
     # plot the vector field
     def plot(self):

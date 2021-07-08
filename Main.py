@@ -14,10 +14,10 @@ from GyreDomain import *
 # simulation attributes
 options = dict()
 options['timestep length'] = 1
-options['total time'] = 100
+options['total time'] = 500
 
 # graph attributes
-n = 50                               # number of nodes on one side (total nodes: n^2) 200
+n = 100                               # number of nodes on one side (total nodes: n^2) 200
 p_0 = 1  # "inertial" parameter (changes probability of staying)
 domain = GyreDomain()
 g = Graph(n, p_0, domain)       # create a graph
@@ -36,7 +36,10 @@ for node in g.nodes:
 
 # create and run simulation
 sim = Simulation(g, options)    # create a GyreSimulation
+#domain.plot()
+#sim.plot_steady_state()
 
-sim.plot_steady_state()
-#mass_0 = np.ones(n**2)
-#sim.advection_sim(mass_0)
+#mass_0 = np.zeros(n**2)
+#mass_0[round(n**2/2 + 2*n/3)] = n**2
+mass_0 = np.ones(n**2)
+sim.advection_sim(mass_0)

@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import linalg
+from scipy import sparse
 import math
 
 # import plotting packages and set default figure options
@@ -74,8 +75,9 @@ class Simulation:
 
     def advection_sim(self, mass):
         self.advection_transition_matrix()
+        #sparse_tMatrix = sparse.csr_matrix(self.advection_tMatrix)
         counter = 0
-        frameskip = 5
+        frameskip = 1
         for timestep in range(0, round(self.options['total time']/self.options['timestep length'])):
             # color scheme
             #cmap = 'gray'
@@ -85,6 +87,7 @@ class Simulation:
             d = self.graph.domain
             dom = [d.x_lim[0], d.x_lim[1], d.y_lim[0], d.y_lim[1]]
 
+            #mass = mass.dot(sparse_tMatrix)
             # plot
             if(counter % frameskip == 0):
                 fig = plt.figure()
@@ -93,6 +96,7 @@ class Simulation:
                 plt.colorbar()
                 plt.savefig('figures/Step-'+str(int(timestep/frameskip)).zfill(10)+'.png', format='png', bbox_inches='tight')
                 plt.close(fig)
+            counter += 1
             mass = mass.dot(self.advection_tMatrix)
 
     def plot_steady_state(self):
