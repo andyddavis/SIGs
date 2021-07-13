@@ -16,6 +16,7 @@ class Node:                 # Node class
         self.k = k
         self.j = k % n
         self.i = round((k-self.j)/n)
+        self.particles = [None]
 
         self.domain = domain
 

@@ -9,7 +9,7 @@ class GyreDomain:
     def external_velocity(self, x, y):
         x = x
         y = y
-        k = 1
+        k = 2
         #return (np.sin(k * np.pi * x) * np.cos(k * np.pi * y), np.cos(k * np.pi * x) * np.sin(k * np.pi *y))
         #return (k*y/np.linalg.norm([x,y]), -k*x/np.linalg.norm([x,y]))
         return (np.sin(k * np.pi * x) * np.cos(k * np.pi * y), - np.cos(k * np.pi * x) * np.sin(k * np.pi *y))

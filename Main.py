@@ -5,6 +5,7 @@ import time as t
 import matplotlib.pyplot as plt
 
 from Domain import *
+from Particle import *
 from Node import *
 from Graph import *
 from Simulation import *
@@ -17,10 +18,14 @@ options['timestep length'] = 1
 options['total time'] = 500
 
 # graph attributes
-n = 100                               # number of nodes on one side (total nodes: n^2) 200
+n = 50   # number of nodes on one side (total nodes: n^2) 200
 p_0 = 1  # "inertial" parameter (changes probability of staying)
 domain = GyreDomain()
 g = Graph(n, p_0, domain)       # create a graph
+
+# particle placement
+for i in range(0,1000):
+    g.nodes[int(n**2 / 3 + round(2*n/3))].particles.insert(0,Particle(0,1))
 
 # check Courant number is maintained
 C = 1                           # Courant number (?)
@@ -37,9 +42,5 @@ for node in g.nodes:
 # create and run simulation
 sim = Simulation(g, options)    # create a GyreSimulation
 #domain.plot()
-#sim.plot_steady_state()
 
-#mass_0 = np.zeros(n**2)
-#mass_0[round(n**2/2 + 2*n/3)] = n**2
-mass_0 = np.ones(n**2)
-sim.advection_sim(mass_0)
+sim.advection_sim_particles()
