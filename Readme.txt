@@ -24,3 +24,8 @@ df_or_not: when set to 1, we are computing df; when set to 0, we are not
 Note: Currently, the computation of df is extremely computational expensive!!!
 
 In this simulation, we initialize at particles at n^2 nodes whose velocities follow a 2D Gaussian distribution. Mean: [0,0]  Variance: 2D identity matrix
+If you wish to change the vector field of the gyre go to the part:
+
+def external_velocity(self, x, y)
+
+and the change the return value, which is a function of x and y.
