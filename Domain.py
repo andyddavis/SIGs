@@ -1,16 +1,19 @@
-import statistics as st
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Domain:
     def __init__(self):
-        self.x_lim = (0,1)
-        self.y_lim = (0,1)
+        self.x_lim = (0.0, 1.0)
+        self.y_lim = (0.0, 1.0)
 
-    # O---------- define floe movement function (vector field)  ----------O
-    def floe_movement(self,x,y):
-        x = x-st.mean(self.x_lim)        # centers the graph at
-        y = y-st.mean(self.y_lim)        # the center of limits
+    # define external velocity (vector field) function
+    def external_velocity(self, x, y):
+        return (0.0, 0.0)
 
-        z = (x**2 + y**2)**0.5  # z is magnitude to normalise to unit vectors
-        if (z == 0):                # catches division by zero
-            z = 1
-        return (y/z,-x/z)           # actual function (unit gyre, clockwise)
+    # external velocity plot
+    def plot(self):
+        x,y = np.meshgrid(np.linspace(self.x_lim[0],self.x_lim[1],10),np.linspace(self.y_lim[0],self.y_lim[1],10))
+        (u,v) = self.external_velocity(x,y)
+        plt.quiver(x,y,u,v)
+        plt.show()
+        plt.axis('equal')
