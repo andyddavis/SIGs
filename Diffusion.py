@@ -4,21 +4,21 @@ class Diffusion:
 
     def __init__(self, graph, dt, mass):
         self.graph = graph
-        self.transition_matrix = np.zeros(self.graph.n**2, self.graph.n**2)
+        self.transition_matrix = np.zeros((self.graph.n**2, self.graph.n**2))
         self.dt = dt
         self.mass = mass
 
-    def psi(self, k, mass):
-        return mass[k] / mass.sum()
+    def psi(self, k):
+        return self.mass[k] / self.mass.sum()
 
     # initialises the node advection probabilities and their corresponding indices
-    def node_diffusion_transition_probabilities(self, node, mass):
+    def node_diffusion_transition_probabilities(self, node):
 
         # calculate node indices (periodic boundary), ordered: itself, left, right, below, above)
         transition_node_indices = [node.k, (node.j-1) % self.graph.n + self.graph.n * node.i , (node.j+1) % self.graph.n + self.graph.n * node.i, (node.k + self.graph.n ) % self.graph.n**2, (node.k - self.graph.n) % self.graph.n**2]
 
         # calculate probability of staying
-        p_stay = 1 / (1 + self.psi(node.k, mass) * self.options['timestep length'])
+        p_stay = 1 / (1 + self.psi(node.k) * self.dt)
 
         # initialise probabilities
         transition_node_probabilities = [0.0] * len(transition_node_indices)
@@ -30,7 +30,7 @@ class Diffusion:
 
         # otherwise, calculate "leaving measure" for each neighbor
         for i in range(1, len(transition_node_indices)):
-            transition_node_probabilities[i] = (1/4) * self.psi(node.k, mass) * p_stay
+            transition_node_probabilities[i] = (1/4) * self.psi(node.k) * p_stay
 
         # normalise probabilies of leaving
         S = sum(transition_node_probabilities)
@@ -41,8 +41,8 @@ class Diffusion:
         return transition_node_indices, transition_node_probabilities
 
     # initialise the diffusion matrix
-    def initialise_transition_matrix(self, mass):
+    def initialise_transition_matrix(self):
         for node in self.graph.nodes:
-            (indices, probabilities) = self.node_diffusion_transition_probabilities(node, mass)
+            (indices, probabilities) = self.node_diffusion_transition_probabilities(node)
             for i in range(0,len(indices)):
-                self.diffusion_tMatrix[node.k, indices[i]] = probabilities[i]
+                self.transition_matrix[node.k, indices[i]] = probabilities[i]

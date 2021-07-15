@@ -7,7 +7,7 @@ class Advection:
     def __init__(self, graph, dt):
         self.graph = graph
         self.dt = dt
-        self.transition_matrix = np.zeros(self.graph.n**2, self.graph.n**2)
+        self.transition_matrix = np.zeros((self.graph.n**2, self.graph.n**2))
 
     # initialises the node advection probabilities and their corresponding indices
     def node_advection_transition_probabilities(self, node):
@@ -16,7 +16,7 @@ class Advection:
         transition_node_indices = [node.k, (node.j-1) % self.graph.n + self.graph.n * node.i , (node.j+1) % self.graph.n + self.graph.n * node.i, (node.k + self.graph.n ) % self.graph.n**2, (node.k - self.graph.n) % self.graph.n**2]
 
         # calculate probability of staying
-        p_stay = 1 / (1 + self.graph.p_0 * self.graph.n * dt * np.linalg.norm(node.velocity()))
+        p_stay = 1 / (1 + self.graph.p_0 * self.graph.n * self.dt * np.linalg.norm(node.velocity()))
 
         # initialise probabilities
         transition_node_probabilities = [0.0] * len(transition_node_indices)
@@ -54,7 +54,7 @@ class Advection:
     # plots the steady state
     def plot_steady_state(self):
         # initialise the advection transition matrix
-        self.advection_transition_matrix()
+        self.initialise_transition_matrix()
         # eigendecomposition; eigenvalues, eigenvectors
         L, V = linalg.eig(self.transition_matrix, left=True, right=False)
 

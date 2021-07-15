@@ -81,7 +81,7 @@ class Simulation:
             # plot every frameskip
             if(timestep % self.options['frameskip'] == 0):
                 fig = plt.figure()
-                plt.imshow(m.reshape(self.graph.n,self.graph.n), cmap=c_map, interpolation='nearest',  extent=dom, vmin=0, vmax = np.sum(m) / self.graph.n)
+                plt.imshow(mass.reshape(self.graph.n,self.graph.n), cmap=c_map, interpolation='nearest',  extent=dom, vmin=0, vmax = np.sum(mass) / self.graph.n)
                 plt.title("Time: " + str(timestep * self.options['timestep length']))
                 plt.colorbar()
                 plt.savefig('figures/Step-'+str(int(timestep/self.options['frameskip'])).zfill(10)+'.png', format='png', bbox_inches='tight')
