@@ -3,7 +3,7 @@ import numpy as np
 
 from Particle import *
 
-class CollisionOperator:        # Collision Operator class
+class CollisionOperator:
 
     r_1 = 100   # particles (floes) per unit mass
     r_2 = 0.5   # percent of particles colliding

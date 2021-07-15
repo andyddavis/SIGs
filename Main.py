@@ -5,27 +5,24 @@ import time as t
 import matplotlib.pyplot as plt
 
 from Domain import *
+from GyreDomain import *
 from Particle import *
 from Node import *
 from Graph import *
 from Simulation import *
 
-from GyreDomain import *
 
 # simulation attributes
 options = dict()
 options['timestep length'] = 1
-options['total time'] = 500
+options['total time'] = 1000
+options['frameskip'] = 5
 
 # graph attributes
-n = 50   # number of nodes on one side (total nodes: n^2) 200
-p_0 = 1  # "inertial" parameter (changes probability of staying)
-domain = GyreDomain()
-g = Graph(n, p_0, domain)       # create a graph
-
-# particle placement
-for i in range(0,1000):
-    g.nodes[int(n**2 / 3 + round(2*n/3))].particles.insert(0,Particle(0,1))
+n = 10                   # number of nodes on one side (total nodes: n^2) 200
+p_0 = 1                 # "inertial" parameter (changes probability of staying)
+domain = GyreDomain()   # domain of choice
+g = Graph(n, p_0, domain)
 
 # check Courant number is maintained
 C = 1                           # Courant number (?)
@@ -39,8 +36,18 @@ for node in g.nodes:
     if flag == True:
         break
 
+# particle placement for particle sim
+for i in range(0,1):
+    g.nodes[int(n**2 / 3 + round(2*n/3))].particles.insert(0,Particle(0,1))
+
+# mass distribution for mass sim
+mass_0 = np.zeros(n**2)
+mass_0[int(n**2 / 2)] = 100
+
 # create and run simulation
 sim = Simulation(g, options)    # create a GyreSimulation
-#domain.plot()
 
-sim.advection_sim_particles()
+#domain.plot()
+#sim.advection_sim(mass_0)
+#sim.diffusion_sim(mass_0)
+#sim.advection_sim_particles()

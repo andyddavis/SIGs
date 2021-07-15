@@ -3,7 +3,7 @@ import numpy as np
 from Domain import *
 from Node import *
 
-class Graph:                                                # Graph class
+class Graph:
 
     def __init__(self, n, p_0, domain):
         self.n = n                                          # number of nodes on onee side of the graph

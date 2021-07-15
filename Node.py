@@ -1,11 +1,6 @@
-import statistics as st
-
-import weakref
-
 from Domain import *
 
-
-class Node:                 # Node class
+class Node:
     # map from (i,j) in n x n to k in n^2 : (i,j) -> k= i*n + j (n-ary two-digit expression)
     # reverse map for k: k -> ((k-j)/n, k mod n)
 

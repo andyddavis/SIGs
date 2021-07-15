@@ -10,7 +10,6 @@ class GyreDomain:
         x = x
         y = y
         k = 2
-        #return (np.sin(k * np.pi * x) * np.cos(k * np.pi * y), np.cos(k * np.pi * x) * np.sin(k * np.pi *y))
         #return (k*y/np.linalg.norm([x,y]), -k*x/np.linalg.norm([x,y]))
         return (np.sin(k * np.pi * x) * np.cos(k * np.pi * y), - np.cos(k * np.pi * x) * np.sin(k * np.pi *y))
 

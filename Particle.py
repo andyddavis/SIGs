@@ -1,4 +1,4 @@
-class Particle:                 # Particle class
+class Particle:
 
     def __init__(self, vel, mass):
         self.vel = vel              # velocity (np array)
