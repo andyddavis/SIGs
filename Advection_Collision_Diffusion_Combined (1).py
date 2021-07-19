@@ -109,7 +109,7 @@ class Domain:
 # In[140]:
 
 
-class GyreDomain:
+class GyreDomain(Domain):
     def __init__(self):
         Domain.__init__(self)
 
