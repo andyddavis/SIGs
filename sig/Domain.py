@@ -39,11 +39,11 @@ class Domain:
 
     # define external velocity (vector field) function
     def external_velocity(self, x, y):
-        return (0.0, 0.0)
+        return (1.0, 0.0)
 
     # collision rate function
     def collision_rate(self, x, y):
-        return 1.0
+        return (0.5 if x<0.5 else 1.5)
 
     def mean_free_path(self, x, y):
         return 1.0e-2
