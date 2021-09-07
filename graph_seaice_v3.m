@@ -54,7 +54,7 @@ end
 w = zeros(n,n); % holds velocities projected onto edges where w(i,j) is the velocity at node i projected onto the edge from i to j
 A = zeros(n,n); 
 
-figure; % for graph
+% figure; % for graph
 for i = 1:n
 [M, I] = mink(dist(i,:),k); % M contains the k nearest neighbors of node i and I contains their indices 
 ind(i,:) = I;  % store the indices of the k nearest neighbors of node i in the ith row of matrix ind
@@ -65,16 +65,16 @@ for j = 1:k
     
     A(ind(i,j),i) = max(dot(e_ik, V(i,:)),0)/norm(e_ik);
 end 
-scatter(node_nb_i(:,1), node_nb_i(:,2)) % comment/uncomment to plot/turn-off plot graph
-line(node_nb_i(:,1), node_nb_i(:,2)) 
+% scatter(node_nb_i(:,1), node_nb_i(:,2)) % comment/uncomment to plot/turn-off plot graph
+% line(node_nb_i(:,1), node_nb_i(:,2)) 
 
-hold on
+% hold on
 end
-% to visualize velocity vectors evaluated at nodes on the graph plot 
-hold on 
-quiver(node_x,node_y,dx,dy)
-xlim([0 1]) 
-ylim([0 1])
+% comment/uncomment to visualize velocity vectors evaluated at nodes on the graph plot 
+% hold on 
+% quiver(node_x,node_y,dx,dy)
+% xlim([0 1]) 
+% ylim([0 1])
 
 TF = isnan(A);
 A(TF) = 0; 
