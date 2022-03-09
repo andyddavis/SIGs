@@ -1,61 +1,110 @@
 import numpy as np
 
-from Domain import *
 from Node import *
 
-class Graph:                # Graph class
-    # each node has a probability of mass staying (p_stay)
-    # and a list of nodes equipped with a transition matrix
+class Graph:
+    def __init__(self, nx, Lx, ny, Ly, m):
+        self.nx = nx # number of nodes in the x direction
+        self.ny = ny # number of nodes in the y direction
+        self.n = self.ny*self.nx # the total number of nodes
 
-    def __init__(self, n, p_0 , mass):
-        self.n = n                                          # number of nodes on onee side of the graph
-        self.nodes = []                                     # list of nodes (not sure if needed)
-        self.mass = mass                                    # initial coditions (mass at each node)
-        self.p_0 = p_0                                      # probability of staying parameter
-        self.tMatrix = np.zeros((n**2,n**2))                # transition matrix
-        self.domain = Domain()
+        self.m = m # the number of particles
 
-    def initialise_nodes(self):
-        self.nodes = [None]*(self.n**2)
-        for k in range(0,self.n**2):
-            self.nodes[k] = Node(self.domain,k,self.n)               # nodes are denoted with single index k
+        self.Lx = Lx # length of the domain in the x direction
+        self.Ly = Ly # length of the domain in the y direction
 
-    def initialise_tMatrix(self):
-        self.initialise_nodes()                             # initialise the nodes
+        dx = self.Lx/self.nx # the length of each region in the x direction
+        dy = self.Ly/self.ny # the length of each region in the y direction
 
-        for node in self.nodes:                             # assign probabilities for eaech node:
+        # x and y coordinates of the nodes
+        self.x = np.linspace(dx/2.0, self.Lx-dx/2.0, self.nx)
+        self.y = np.linspace(dy/2.0, self.Ly-dy/2.0, self.ny)
 
-            k = node.k
-            n = self.n
-            (u,v) = node.velocity()                         # gather component velocities
+        # create the nodes 
+        self.nodes = [None]*self.n
+        for i in range(self.n):
+            inds = self.LocalIndex(i)
+            self.nodes[i] = Node(self.x[inds[0]], self.y[inds[1]], dx, dy, inds[0], inds[1])
 
-            # boundary conditions: get rid of component if it points outside the space
-            if (k % n == 0 and u < 0):
-                u = 0
-            if (k % n == (n-1) and u > 0):
-                u = 0
-            if (k < n and v > 0):
-                v = 0
-            if (k > (n-1)*n and k < n**2 and v < 0):
-                v = 0
+        # tell each node who it is connected to
+        for i in range(self.nx):
+            for j in range(self.ny):
+                ind = self.GlobalIndex(i, j)
+                if i>0: 
+                    self.nodes[ind].left = self.nodes[self.GlobalIndex(i-1, j)]
+                if i<self.nx-1:
+                    self.nodes[ind].right = self.nodes[self.GlobalIndex(i+1, j)]
+                if j>0: 
+                    self.nodes[ind].bottom = self.nodes[self.GlobalIndex(i, j-1)]
+                if j<self.ny-1:
+                    self.nodes[ind].top = self.nodes[self.GlobalIndex(i, j+1)]
 
-            # pre-calculate useful values
-            v_sum = abs(u) + abs(v)                         # sum of vector components
-            v_mag = (u**2 + v**2)**0.5                      # magnitude of velocity vector at node
-            p_stay = 1 / (1 + self.p_0 * v_mag)                  # probability of staying formula (credit: andy)
-            self.tMatrix[k,k] = p_stay            # assign to diagonals
+        # add particles to the nodes 
+        initialMean = np.array([0.0]*2)
+        initialCov = 0.001*np.identity(2)
+        for i in range(self.m):
+            self.nodes[np.random.randint(0, self.n)].CreateParticle(np.random.multivariate_normal(initialMean, initialCov))
+    # the global index for each node in the domain
+    def GlobalIndex(self, i, j):
+        return j*self.nx + i
 
-            # assign horizontal probabilities (adgacent to node k +/- 1 index)
-            if (u > 0):
-                if(k % n + 1 < n):
-                    self.tMatrix[k,k+1] = (1 - p_stay) * u / v_sum
-            elif (u < 0):
-                if(k % n - 1 >= 0):
-                    self.tMatrix[k,k-1] = -(1 - p_stay) * u / v_sum
-            # assign vertical probabilities (adgacent to node k +/- n index)
-            if (v > 0):
-                if(k - n >= 0):
-                    self.tMatrix[k,k-n] = (1 - p_stay) * v / v_sum
-            elif (v < 0):
-                if(k + n < n ** 2):
-                    self.tMatrix[k,k+n] = -(1 - p_stay) * v / v_sum
+    # the global index for each node in the domain
+    def LocalIndex(self, ind):
+        i = ind%self.nx 
+        return int(i), int((ind-i)/self.nx)
+
+    def CheckParticleCount(self):
+        num = 0 
+        for node in self.nodes:
+            num += len(node.particles)
+        return num==self.m
+
+    def MassDensity(self):
+        massDensity = np.array([0.0]*self.n)
+        for i in range(self.n):
+            massDensity[i] = len(self.nodes[i].particles)/float(self.m)/self.nodes[i].area
+
+        return massDensity.reshape(self.ny, self.nx).T
+    
+    def Gamma(self):
+        Gamma = []
+        for node in self.nodes:
+            Gamma.append(node.gamma) 
+
+        return np.array(Gamma).reshape(self.ny, self.nx).T
+    
+    def PE_data(self):
+        PE_data = []
+        for i in self.nodes:
+            PE_data.append(i.PE)
+
+        return np.array(PE_data).reshape(self.ny, self.nx).T
+
+    def TE_data(self):
+        TE_data = []
+        for i in self.nodes:
+            TE_data.append(i.TE)
+
+        return np.array(TE_data).reshape(self.ny, self.nx).T
+    
+    def KE_data(self):
+        KE_data = []
+        for i in self.nodes:
+            KE_data.append(i.KE)
+
+        return np.array(KE_data).reshape(self.ny, self.nx).T
+
+    # update the particle positions and velocities at each node 
+    def ConvectionStep(self, dt):
+        # loop through each particle and update the postion/velocity 
+        for node in self.nodes:
+            node.ConvectionStep(dt)
+
+        for node in self.nodes:
+            node.CombineParticleLists()
+
+    def CollisionStep(self, massDensity, dt, idx):
+        # loop through each particle and have the particles (potentially) collide
+        for i in range(len(self.nodes)):
+            inds = self.LocalIndex(i)
+            self.nodes[i].CollisionStep(massDensity[inds[0], inds[1]], dt, idx)
