@@ -63,7 +63,7 @@ class Domain:
 
     def external_velocity(self, x, y):
         """The external velocity that the ice feels from the ocean and atmosphere. The default is to return (0,0)."""
-        return (0.0, 0.0)
+        return (1.0, 0.0)
 
     def collision_rate(self, x, y):
         """The collision rate function that defines the frequently particles collide in the collision operator. Defaults to 1."""
@@ -75,7 +75,7 @@ class Domain:
 
     def energy_loss_ratio(self, x, y):
         """The amount of energy remaining after a two-particle collision. If it is less than one, energy is lost. If it is greater than one, energy is gained. If it is equal to 1, energy is conserved. Defaults to 1."""
-        return 1
+        return (0.75 if x>0.5 else 1.25)
 
     def area(self):
         """The area of the entire domain"""

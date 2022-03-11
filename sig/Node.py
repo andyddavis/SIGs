@@ -57,8 +57,10 @@ class Node:
             particle.vel += dt*particle.quadratic_drag(external_velocity)
 
         # collision step
-        epsilon = self.domain.mean_free_path(self.position[0], self.position[1])
-        gamma = self.domain.energy_loss_ratio(self.position[0], self.position[1])
+        gamma = np.exp(0.5*self.mass_density*self.mass_density)/(1.0 + self.mass_density*self.potential_energy)
+        epsilon = self.potential_energy/self.total_energy
+        #epsilon = self.domain.mean_free_path(self.position[0], self.position[1])
+        #gamma = self.domain.energy_loss_ratio(self.position[0], self.position[1])
         collision_rate = self.mass_density*self.domain.collision_rate(self.position[0], self.position[1])/epsilon
         if collision_rate<1.0e-8:
             return
