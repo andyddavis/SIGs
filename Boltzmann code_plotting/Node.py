@@ -46,8 +46,9 @@ class Node:
         # update gamma 
         gamma = 0
         if self.particles:
-            gamma0 = 100
-            gamma = (np.tanh(gamma0*(self.TE/self.PE-0.5)) +1)/2
+            gamma0 = 5; gamma1 = 0.5; p = 0.8
+            gamma = (np.tanh(gamma0*(self.KE/self.TE-gamma1)) +1)/2
+            # gamma = (self.KE/self.TE)**p
         self.gamma = gamma
 
 
@@ -66,20 +67,22 @@ class Node:
 
                 # the probability it goes through the left boundary 
                 leftright = self.dy*particle.vel[0]/self.area
-                cumprob[0] = max(0.0, -leftright)
+                cumprob[0] = max(0.01, -leftright)
                 # the probability it goes through the right boundary 
-                cumprob[1] = cumprob[0]+max(0.0, leftright)
+                cumprob[1] = cumprob[0]+max(0.01, leftright)
 
                 # the probability it goes through the top boundary 
                 topbot = self.dx*particle.vel[1]/self.area
-                cumprob[2] = cumprob[1]+max(0.0, topbot)
+                cumprob[2] = cumprob[1]+max(0.01, topbot)
                 # the probability it goes through the right boundary 
-                cumprob[3] = cumprob[2]+max(0.0, -topbot)
-
+                cumprob[3] = cumprob[2]+max(0.01, -topbot)
+                # print('Previous cumprob: ',cumprob)
+                # print('Particle vel: ', particle.vel)
+                # print('left,top',leftright,topbot)
                 delta = min(dt-T, 1.0/cumprob[3])
                 cumprob *= delta
                 T += delta
-
+                # print(cumprob[3])
                 # the cumulative probability of leaving has to be less than one (decrease the timestep if this fail)
                 assert(cumprob[3]-1.0e-10<1.0)
 
@@ -119,6 +122,7 @@ class Node:
         self.newParticles = list()
 
     def CollisionStep(self, mu, dt, idx):
+        randomness = 1
         npart = len(self.particles)
         if npart<2:
             return
@@ -134,27 +138,38 @@ class Node:
                 collisionProbability[i] = self.CollisionRateFuntion()
 
             maxProb = np.max(collisionProbability)
-            assert(maxProb>0.0)
+            if maxProb>0:
+                
+           # assert(maxProb>0.0)
 
-            tau = min(dt-T, self.epsilon/(mu*maxProb))
-            collisionProbability *= tau*mu/self.epsilon
-
-            collide = list()
-            for i in range(npart):
-                if np.random.uniform()<collisionProbability[i]:
-                    collide += [i]
-            np.random.shuffle(collide)
-
-            for i in range(1, len(collide), 2):
-                w = self.SampleUnitHypersphere()
-                w *= self.PostCollisionFunction(self.particles[collide[i-1]].vel, self.particles[collide[i]].vel, w, idx)
-                self.particles[collide[i-1]].vel += w 
-                self.particles[collide[i]].vel -= w
-
+                tau = min(dt-T, self.epsilon/(mu*maxProb))
+                collisionProbability *= tau*mu/self.epsilon
+    
+                collide = list()
+                for i in range(npart):
+                    if np.random.uniform()<collisionProbability[i]:
+                        collide += [i]
+                np.random.shuffle(collide)
+                #fixed_sample = self.SampleUnitHypersphere()
+                for i in range(1, len(collide), 2):
+                    #v1,v2 = self.particles[collide[i-1]].vel, self.particles[collide[i]].vel
+                    
+                    
+                  #  if i < int(len(collide)*(1-randomness)):
+                 #       w = fixed_sample.copy()
+                 #   else:
+                   #     w = self.SampleUnitHypersphere()
+                    #w = (v2-v1)/np.linalg.norm(v2-v1)
+                    w = self.SampleUnitHypersphere()
+                    w *= self.PostCollisionFunction(self.particles[collide[i-1]].vel, self.particles[collide[i]].vel, w, idx)
+                    self.particles[collide[i-1]].vel += w 
+                    self.particles[collide[i]].vel -= w
+            else:
+                return 
             T += tau
     
     def CollisionRateFuntion(self):
-        return 1.0
+        return 0.01*self.KE/self.TE
 
     def SampleUnitHypersphere(self):
         w = np.random.multivariate_normal(np.array([0.0, 0.0]), np.array([[1.0, 0.0], [0.0, 1.0]]))
