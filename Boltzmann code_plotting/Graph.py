@@ -40,11 +40,25 @@ class Graph:
                     self.nodes[ind].top = self.nodes[self.GlobalIndex(i, j+1)]
 
         # add particles to the nodes 
+        randomness = 0.20 # the randomness of initialization
         initialMean = np.array([0.0]*2)
         initialCov = 0.001*np.identity(2)
-        for i in range(self.m):
-            self.nodes[np.random.randint(0, self.n)].CreateParticle(np.random.multivariate_normal(initialMean, initialCov))
-    # the global index for each node in the domain
+        # initialize a list of number of particles at the nodes
+        number_of_particles = [0]*self.n
+        for s in range(self.m):
+            number_of_particles[np.random.randint(0, self.n)] += 1
+        for i, number in enumerate(number_of_particles): # at node i, "number" number of particles
+            vel = np.random.multivariate_normal(initialMean, initialCov)
+            random_number = int(number * randomness) 
+            for particle in range(number - random_number):
+                self.nodes[i].CreateParticle(vel)
+            for random_particle in range(random_number):
+                self.nodes[i].CreateParticle(np.random.multivariate_normal(initialMean, initialCov))
+        # for i in range(self.m):
+        #     self.nodes[np.random.randint(0, self.n)].CreateParticle(np.random.multivariate_normal(initialMean, initialCov))
+  
+    
+  # the global index for each node in the domain
     def GlobalIndex(self, i, j):
         return j*self.nx + i
 
@@ -93,7 +107,27 @@ class Graph:
             KE_data.append(i.KE)
 
         return np.array(KE_data).reshape(self.ny, self.nx).T
+    
+    def PE_TE(self):
+        data = []
+        for i in self.nodes:
+            if i.particles:
+                data.append(i.PE/i.TE)
+            else:
+                data.append(0)
 
+        return np.array(data).reshape(self.ny, self.nx).T
+    
+    def KE_TE(self):
+        data = []
+        for i in self.nodes:
+            if i.particles:
+                data.append(i.KE/i.TE)
+            else:
+                data.append(0)
+
+        return np.array(data).reshape(self.ny, self.nx).T
+    
     # update the particle positions and velocities at each node 
     def ConvectionStep(self, dt):
         # loop through each particle and update the postion/velocity 
