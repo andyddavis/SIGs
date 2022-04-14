@@ -51,7 +51,7 @@ class Graph:
             vel = np.random.multivariate_normal(initialMean, initialCov)
             random_number = int(number * randomness) 
             for particle in range(number - random_number):
-                self.nodes[i].CreateParticle(vel)
+                self.nodes[i].CreateParticle(vel.copy())
             for random_particle in range(random_number):
                 self.nodes[i].CreateParticle(np.random.multivariate_normal(initialMean, initialCov))
         # for i in range(self.m):
