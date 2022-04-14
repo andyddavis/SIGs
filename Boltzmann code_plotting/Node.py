@@ -178,5 +178,5 @@ class Node:
     def PostCollisionFunction(self, v, vprime, w, idx):
         
         we = -w.dot(v-vprime)
-        e = 0.5*(np.linalg.norm(v)-np.linalg.norm(vprime))
+        e = 0.5*(np.linalg.norm(v)**2 + np.linalg.norm(vprime)**2)
         return 0.5*(we + math.copysign(1.0, we)*np.sqrt(max(0.0, we*we-4.0*(1.0-self.gamma)*e)))
