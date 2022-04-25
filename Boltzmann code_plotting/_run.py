@@ -1,17 +1,11 @@
 import numpy as np
 import scipy.sparse as sparse
-
 import h5py as h5
-
 import shutil, os
-
 from Graph import *
 from Plotting import *
-
 from ttictoc import tic,toc
-
 import time
-
 # import plotting packages and set default figure options
 useserif = True # use a serif font with figures?
 import matplotlib as mpl
@@ -27,8 +21,6 @@ plt.rcParams['axes.labelsize'] = 18
 plt.rcParams['xtick.labelsize'] = 14
 plt.rcParams['ytick.labelsize'] = 14
 plt.rcParams['legend.fontsize'] = 14
-
-
 tic()
 
 nx = 50 # number of nodes in the x direction
@@ -39,25 +31,24 @@ Ly = 1.0 # length of the domain in the y direction
 
 m = int(1e5) # the number of particles
 
-#direc = '/Users/25016/OneDrive/桌面/simu0311/copy/'  #accelaration_0.3_collision_rate_KETE
-#direc = '/Users/lm4307/Desktop/simu0311/p_1.5/' 
-direc = 'figures/'
+direc = '/Users/25016/OneDrive/桌面/0414/KE_TE_jump_discontinuity_0.5/'  #accelaration_0.3_collision_rate_KETE
+# direc = '/Users/lm4307/Desktop/0414/gamma_KETE/' 
 
-qois = ['gamma', 'PETE', 'KETE', 'mass']
+qois = ['gamma', 'PETE', 'KETE', 'mass','PE','TE']
 for qoi in qois:
-    if os.path.isdir('figures/'+qoi):
-        shutil.rmtree('figures/'+qoi)
-    os.mkdir('figures/'+qoi)
+    if os.path.isdir(direc+qoi):
+        shutil.rmtree(direc+qoi)
+    os.mkdir(direc+qoi)
 
 # create a regular rectangular graph with m particles
 graph = Graph(nx, Lx, ny, Ly, m)
 dt = 0.01 # the timestep size 
 idx = 0
-nsteps = 1500
+nsteps = 500
 X =[];Y=[]
 plot_or_not = 0
 
-skips = 1 # plot every "skips" time steps
+skips = 5 # plot every "skips" time steps
 
 # get the location of the nodes
 for node in graph.nodes:
@@ -80,6 +71,8 @@ for t in range(nsteps):
         PlotGamma(t, graph, direc)
         PlotPETE(t, graph, direc)
         PlotKETE(t, graph, direc)
+        PlotPE(t, graph, direc)
+        PlotTE(t, graph, direc)
         PlotMass(t, X, Y, massDensity, graph, direc)
         plt.close('all')
 
