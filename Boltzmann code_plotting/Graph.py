@@ -3,7 +3,7 @@ import numpy as np
 from Node import *
 
 class Graph:
-    def __init__(self, nx, Lx, ny, Ly, m):
+    def __init__(self, nx, Lx, ny, Ly, m, gamma_function):
         self.nx = nx # number of nodes in the x direction
         self.ny = ny # number of nodes in the y direction
         self.n = self.ny*self.nx # the total number of nodes
@@ -19,12 +19,12 @@ class Graph:
         # x and y coordinates of the nodes
         self.x = np.linspace(dx/2.0, self.Lx-dx/2.0, self.nx)
         self.y = np.linspace(dy/2.0, self.Ly-dy/2.0, self.ny)
-
+        self.gamma_function = gamma_function
         # create the nodes 
         self.nodes = [None]*self.n
         for i in range(self.n):
             inds = self.LocalIndex(i)
-            self.nodes[i] = Node(self.x[inds[0]], self.y[inds[1]], dx, dy, inds[0], inds[1])
+            self.nodes[i] = Node(self.x[inds[0]], self.y[inds[1]], dx, dy, inds[0], inds[1], self.gamma_function)
 
         # tell each node who it is connected to
         for i in range(self.nx):
