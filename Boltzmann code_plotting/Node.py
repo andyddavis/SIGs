@@ -14,12 +14,10 @@ class Node:
         # the particles in this region---initially there are none 
         self.particles = list()
         self.newParticles = list()
-
         self.top = None
         self.bottom = None
         self.left = None
         self.right = None
-
         self.epsilon = 1.0e-2
         # if self.y<0.5:
         #     self.gamma = 1.0
@@ -42,11 +40,14 @@ class Node:
         TE /= len(self.particles) if self.particles else 1
         self.KE = 0.5*np.dot(expected_vel, expected_vel)
         self.TE = TE
-        self.PE = TE - self.KE 
+        self.PE = TE - self.KE
+        self.gamma = 0
         # update gamma 
         gamma = 0
         if self.particles:
-            gamma0 = 5; gamma1 = 0.5; p = 0.8
+            gamma0 = 10; gamma1 = 0.5; p = 0.8
+            # if ((self.x - 0.5)**2 + (self.y - 0.5)**2) <= 1/9:
+            #     gamma = 1
             gamma = (np.tanh(gamma0*(self.KE/self.TE-gamma1)) +1)/2
             # gamma = (self.KE/self.TE)**p
         self.gamma = gamma
@@ -120,8 +121,33 @@ class Node:
     def CombineParticleLists(self):
         self.particles.extend(self.newParticles)
         self.newParticles = list()
+        
+        
+    def NewCollisionStep (self, gamma):
+        npart = len(self.particles)
+        if npart<2:
+            return
+        collisionProbability = np.array([0.0]*npart)
+        for i in range(npart):
+            collisionProbability[i] = self.CollisionRateFuntion()
+        maxProb = np.max(collisionProbability)
+        
+        if maxProb>0:
+            
+            collide = list()
+            for i in range(npart):
+                if np.random.uniform()<collisionProbability[i]:
+                    collide+=[i]
+            np.random.shuffle(collide)
+            
+            for i in range(1, int((len(collide)-1)/2)*2+1,2):
+                w = self.SampleUnitHypersphere()
+                w *= self.PostCollisionFunction(self.particles[collide[i-1]].vel, 
+                                                self.particles[collide[i]].vel, w, gamma)
+                self.particles[collide[i-1]].vel += w 
+                self.particles[collide[i]].vel -= w
 
-    def CollisionStep(self, mu, dt, idx):
+    def CollisionStep(self, mu, dt, idx, gamma):
         randomness = 1
         npart = len(self.particles)
         if npart<2:
@@ -150,18 +176,9 @@ class Node:
                     if np.random.uniform()<collisionProbability[i]:
                         collide += [i]
                 np.random.shuffle(collide)
-                #fixed_sample = self.SampleUnitHypersphere()
-                for i in range(1, len(collide), 2):
-                    #v1,v2 = self.particles[collide[i-1]].vel, self.particles[collide[i]].vel
-                    
-                    
-                  #  if i < int(len(collide)*(1-randomness)):
-                 #       w = fixed_sample.copy()
-                 #   else:
-                   #     w = self.SampleUnitHypersphere()
-                    #w = (v2-v1)/np.linalg.norm(v2-v1)
+                for i in range(1, len(collide), 2): 
                     w = self.SampleUnitHypersphere()
-                    w *= self.PostCollisionFunction(self.particles[collide[i-1]].vel, self.particles[collide[i]].vel, w, idx)
+                    w *= self.PostCollisionFunction(self.particles[collide[i-1]].vel, self.particles[collide[i]].vel, w, gamma)
                     self.particles[collide[i-1]].vel += w 
                     self.particles[collide[i]].vel -= w
             else:
@@ -169,14 +186,13 @@ class Node:
             T += tau
     
     def CollisionRateFuntion(self):
-        return 0.01*self.KE/self.TE
+        return 0.5#0.01*self.KE/self.TE
 
     def SampleUnitHypersphere(self):
         w = np.random.multivariate_normal(np.array([0.0, 0.0]), np.array([[1.0, 0.0], [0.0, 1.0]]))
         return w/np.linalg.norm(w)
 
-    def PostCollisionFunction(self, v, vprime, w, idx):
-        
+    def PostCollisionFunction(self, v, vprime, w, gamma):
         we = -w.dot(v-vprime)
         e = 0.5*(np.linalg.norm(v)**2 + np.linalg.norm(vprime)**2)
-        return 0.5*(we + math.copysign(1.0, we)*np.sqrt(max(0.0, we*we-4.0*(1.0-self.gamma)*e)))
+        return 0.5*(we + math.copysign(1.0, we)*np.sqrt(max(0.0, we*we-4.0*(1.0-gamma)*e)))
