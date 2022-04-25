@@ -4,7 +4,7 @@ import math
 from Particle import *
 
 class Node:
-    def __init__(self, x, y, dx, dy, i,j):
+    def __init__(self, x, y, dx, dy, i,j, gamma_function):
         self.x = x # the x location of the node 
         self.y = y # the y location of the node
         self.dx = dx # the length the region in the x direction
@@ -19,6 +19,7 @@ class Node:
         self.left = None
         self.right = None
         self.epsilon = 1.0e-2
+        self.gamma_function = gamma_function
         # if self.y<0.5:
         #     self.gamma = 1.0
         # else:
@@ -38,19 +39,22 @@ class Node:
         expected_vel /= len(self.particles) if self.particles else 1
         self.ev = expected_vel
         TE /= len(self.particles) if self.particles else 1
-        self.KE = 0.5*np.dot(expected_vel, expected_vel)
+        KE = 0.5*np.dot(expected_vel, expected_vel)
+        PE = TE - KE
+        self.KE = KE
         self.TE = TE
-        self.PE = TE - self.KE
-        self.gamma = 0
-        # update gamma 
-        gamma = 0
-        if self.particles:
-            gamma0 = 10; gamma1 = 0.5; p = 0.8
-            # if ((self.x - 0.5)**2 + (self.y - 0.5)**2) <= 1/9:
-            #     gamma = 1
-            gamma = (np.tanh(gamma0*(self.KE/self.TE-gamma1)) +1)/2
-            # gamma = (self.KE/self.TE)**p
-        self.gamma = gamma
+        self.PE = PE
+        self.gamma = self.gamma_function(self.x, self.y, PE, KE, TE)
+        # self.gamma = 0
+        # # update gamma 
+        # gamma = 0
+        # if self.particles:
+        #     gamma0 = 10; gamma1 = 0.5; p = 0.8
+        #     # if ((self.x - 0.5)**2 + (self.y - 0.5)**2) <= 1/9:
+        #     #     gamma = 1
+        #     gamma = (np.tanh(gamma0*(self.KE/self.TE-gamma1)) +1)/2
+        #     # gamma = (self.KE/self.TE)**p
+        # self.gamma = gamma
 
 
     # update the particle positions and velocities
