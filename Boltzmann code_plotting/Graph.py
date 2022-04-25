@@ -54,9 +54,6 @@ class Graph:
                 self.nodes[i].CreateParticle(vel.copy())
             for random_particle in range(random_number):
                 self.nodes[i].CreateParticle(np.random.multivariate_normal(initialMean, initialCov))
-        # for i in range(self.m):
-        #     self.nodes[np.random.randint(0, self.n)].CreateParticle(np.random.multivariate_normal(initialMean, initialCov))
-  
     
   # the global index for each node in the domain
     def GlobalIndex(self, i, j):
@@ -141,4 +138,4 @@ class Graph:
         # loop through each particle and have the particles (potentially) collide
         for i in range(len(self.nodes)):
             inds = self.LocalIndex(i)
-            self.nodes[i].CollisionStep(massDensity[inds[0], inds[1]], dt, idx)
+            self.nodes[i].CollisionStep(massDensity[inds[0], inds[1]], dt, idx, self.nodes[i].gamma)
