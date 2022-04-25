@@ -1,5 +1,4 @@
 from Graph import *
-
 # import plotting packages and set default figure options
 useserif = True # use a serif font with figures?
 import matplotlib as mpl
@@ -48,6 +47,28 @@ def PlotKETE(t, graph, direc):
     plt.savefig(direc+'KETE/'+'fig_KETE-'+str(t).zfill(6)+'.png', format='png', bbox_inches='tight')
     fig.clear()
     plt.close(fig)
+    
+def PlotPE(t, graph, direc):
+    # plot PE
+    fig = plt.figure(figsize = (40,30), clear = True)
+    PE = graph.PE_data()
+    ax = plt.gca()
+    pc = ax.pcolormesh(graph.x, graph.y, PE.T, shading='auto', cmap='jet')
+    fig.colorbar(pc)
+    plt.savefig(direc+'PE/'+'fig_PE-'+str(t).zfill(6)+'.png', format='png', bbox_inches='tight')
+    fig.clear()
+    plt.close(fig)
+
+def PlotTE(t, graph, direc):
+    # plot TE 
+    fig = plt.figure(figsize = (40,30), clear = True)
+    TE = graph.TE_data()
+    ax = plt.gca()
+    pc = ax.pcolormesh(graph.x, graph.y, TE.T, shading='auto', cmap='jet')
+    fig.colorbar(pc)
+    plt.savefig(direc+'TE/'+'fig_TE-'+str(t).zfill(6)+'.png', format='png', bbox_inches='tight')
+    fig.clear()
+    plt.close(fig)
 
 def PlotMass(t, X, Y, massDensity, graph, direc):
     fig = plt.figure(figsize = (40,30), clear = True)
@@ -71,3 +92,4 @@ def PlotMass(t, X, Y, massDensity, graph, direc):
     plt.savefig(direc+'mass/'+'fig_mass-density-'+str(t).zfill(6)+'.png', format='png', bbox_inches='tight')
     fig.clear()
     plt.close(fig)
+    
