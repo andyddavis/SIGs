@@ -21,7 +21,7 @@ plt.rcParams['axes.labelsize'] = 18
 plt.rcParams['xtick.labelsize'] = 14
 plt.rcParams['ytick.labelsize'] = 14
 plt.rcParams['legend.fontsize'] = 14
-tic()
+
 
 nx = 50 # number of nodes in the x direction
 ny = 50 # number of nodes in the y direction
@@ -59,6 +59,7 @@ skips_list = [5,5,5] # plot every "skips" time steps
 timestep_list = [0.01,0.01,0.01] # the timestep size 
 
 for direc,gamma,nsteps,skips,dt in zip(direc_list,gamma_list,steps_list,skips_list,timestep_list):
+    tic()
     direc = parent_direc + direc
     qois = ['gamma', 'PETE', 'KETE', 'mass','PE','TE']
     for qoi in qois:
